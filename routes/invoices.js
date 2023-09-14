@@ -15,7 +15,7 @@ router.get("/", async function (req, res, next) {
   const results = await db.query(
     `SELECT id, comp_code
         FROM invoices
-        ORDER BY comp_code`
+        ORDER BY id`
   );
   const invoices = results.rows;
 
@@ -24,7 +24,8 @@ router.get("/", async function (req, res, next) {
 
 
 
-/** GET / => {invoice: {id, amt, paid, add_date, paid_date, company: {code, name, description}} */
+/** GET / => {invoice: {id, amt, paid, add_date, paid_date,
+ *            company: {code, name, description}} */
 
 router.get("/:id", async function (req, res, next) {
   const { id } = req.params;
