@@ -28,7 +28,7 @@ router.get("/:code", async function (req, res, next) {
   const { code } = req.params;
 
   const companyResults = await db.query(
-    `SELECT code, name
+    `SELECT code, name, description
         FROM companies
         WHERE code = $1`,
     [code]
@@ -64,7 +64,7 @@ router.post("/", async function (req, res, next) {
   );
   const company = result.rows[0];
 
-  return res.json({ company });
+  return res.status(201).json({ company });
 });
 
 
