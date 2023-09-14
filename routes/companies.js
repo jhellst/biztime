@@ -22,18 +22,29 @@ router.get("/", async function (req, res, next) {
 });
 
 
-/** GET / => {company: {code, name, description}} */
+/** GET / => {company: {code, name, description, invoices: [id, ...]}} */
 
 router.get("/:code", async function (req, res, next) {
   const { code } = req.params;
 
-  const results = await db.query(
+  const companyResults = await db.query(
     `SELECT code, name
         FROM companies
         WHERE code = $1`,
     [code]
   );
-  const company = results.rows[0];
+  const company = companyResults.rows[0];
+
+  if (!company) throw new NotFoundError("Company not found.");
+
+  const invoiceResults = await db.query(
+    `SELECT id
+        FROM invoices
+        WHERE comp_code = $1`,
+    [code]
+  );
+
+  company.invoices = invoiceResults.rows.map(r => r.id);
 
   return res.json({ company });
 });
@@ -47,8 +58,8 @@ router.post("/", async function (req, res, next) {
 
   const result = await db.query(
     `INSERT INTO companies (code, name, description)
-      VALUES ($1, $2, $3)
-      RETURNING code, name, description`,
+        VALUES ($1, $2, $3)
+        RETURNING code, name, description`,
     [code, name, description]
   );
   const company = result.rows[0];
@@ -76,7 +87,7 @@ router.put("/:code", async function (req, res, next) {
   );
 
   const company = result.rows[0];
-  if (!company) throw new NotFoundError(`${req.params.code} not found.`);
+  if (!company) throw new NotFoundError(`${code} not found.`);
 
   return res.json({ company });
 });
@@ -88,11 +99,11 @@ router.delete("/:code", async function (req, res, next) {
 
   const result = await db.query(
     `DELETE FROM companies WHERE code = $1
-      RETURNING name`,
+        RETURNING name`,
     [code]
   );
 
-  if (!result.rows[0]) throw new NotFoundError(`${req.params.code} not found.`);
+  if (!result.rows[0]) throw new NotFoundError(`${code} not found.`);
 
   return res.json({ status: "deleted" });
 });
