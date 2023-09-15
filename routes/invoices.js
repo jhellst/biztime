@@ -71,7 +71,7 @@ router.post("/", async function (req, res, next) {
   );
   const invoice = result.rows[0];
 
-  return res.json({ invoice });
+  return res.status(201).json({ invoice });
 });
 
 
@@ -96,7 +96,7 @@ router.put("/:id", async function (req, res, next) {
 
   if (!invoice) throw new NotFoundError(`Invoice of id ${id} not found.`);
 
-  return res.json({ invoice });
+  return res.status(200).json({ invoice });
 });
 
 
